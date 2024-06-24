@@ -113,8 +113,8 @@ class Counting(commands.Cog):
         current_number = await self.config.guild(ctx.guild).current_number()
         await ctx.send(f"The current number is: {current_number}")
 
-    @counting.command(aliases=["leaderboard", "lb"])
-    async def leaderboard(self, ctx):
+    @counting.command()
+    async def countlb(self, ctx):
         """Displays the leaderboard in an embed."""
         leaderboard = await self.config.guild(ctx.guild).leaderboard()
         if leaderboard:
