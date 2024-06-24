@@ -11,8 +11,8 @@ class Counting(commands.Cog):
         "current_number": 0,
         "channel_id": None,
         "leaderboard": {},
-        "correct_emote": "✅",
-        "wrong_emote": "❌",
+        "correct_emote": "",
+        "wrong_emote": "",
         "shame_role": None,
         "last_counter_id": None
     }
@@ -22,24 +22,30 @@ class Counting(commands.Cog):
         self.config = Config.get_conf(self, identifier=271828, force_registration=True)
         self.config.register_guild(**self.default_guild)
 
-    @commands.command()
-    async def countingsetchannel(self, ctx, channel: discord.TextChannel = None):
+    @commands.group()
+    async def counting(self, ctx):
+        """Group command for managing the counting game."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
+
+    @counting.command()
+    async def setchannel(self, ctx, channel: discord.TextChannel = None):
         """Sets the channel for the counting game. If no channel is provided, a new one is created."""
         guild = ctx.guild
 
         if channel is None:
             channel = await guild.create_text_channel(name="counting-game")
-            await ctx.send(f"Counting game channel created: {channel.mention}. Please set the shame role (optional) using `countingsetshamerole`.")
+            await ctx.send(f"Counting game channel created: {channel.mention}. Please set the shame role (optional) using `counting setshame`.")
         else:
-            await ctx.send(f"Counting game channel set to {channel.mention}. Please set the shame role (optional) using `countingsetshamerole`.")
+            await ctx.send(f"Counting game channel set to {channel.mention}. Please set the shame role (optional) using `counting setshame`.")
 
         await self.config.guild(ctx.guild).channel_id.set(channel.id)
         await self.config.guild(ctx.guild).current_number.set(1)
         await self.config.guild(ctx.guild).leaderboard.set({})
         await self.config.guild(ctx.guild).last_counter_id.set(None)
 
-    @commands.command()
-    async def countingsetshamerole(self, ctx, shame_role: discord.Role):
+    @counting.command()
+    async def setshame(self, ctx, shame_role: discord.Role):
         """Sets the shame role for incorrect counting (optional)."""
         await self.config.guild(ctx.guild).shame_role.set(shame_role.id)
         await ctx.send(f"Shame role for counting set to {shame_role.mention}")
@@ -89,14 +95,14 @@ class Counting(commands.Cog):
             except ValueError:
                 pass  # Ignore non-numeric messages
 
-    @commands.command()
-    async def currentnumber(self, ctx):
+    @counting.command()
+    async def current(self, ctx):
         """Displays the current number in the counting game."""
         current_number = await self.config.guild(ctx.guild).current_number()
         await ctx.send(f"The current number is: {current_number}")
 
-    @commands.command(aliases=["countingboard", "countingleaderboard"])
-    async def countinglb(self, ctx):
+    @counting.command(aliases=["leaderboard", "lb"])
+    async def leaderboard(self, ctx):
         """Displays the leaderboard in an embed."""
         leaderboard = await self.config.guild(ctx.guild).leaderboard()
         if leaderboard:
