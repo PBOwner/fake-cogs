@@ -11,8 +11,8 @@ class Counting(commands.Cog):
         "current_number": 0,
         "channel_id": None,
         "leaderboard": {},
-        "correct_emote": "",
-        "wrong_emote": "",
+        "correct_emote": "✅",
+        "wrong_emote": "❌",
         "shame_role": None,
         "last_counter_id": None
     }
@@ -49,6 +49,18 @@ class Counting(commands.Cog):
         """Sets the shame role for incorrect counting (optional)."""
         await self.config.guild(ctx.guild).shame_role.set(shame_role.id)
         await ctx.send(f"Shame role for counting set to {shame_role.mention}")
+
+    @counting.command()
+    async def setcorrectemote(self, ctx, emote: str):
+        """Sets the emoji to react with when the count is correct."""
+        await self.config.guild(ctx.guild).correct_emote.set(emote)
+        await ctx.send(f"Correct emote set to {emote}")
+
+    @counting.command()
+    async def setwrongemote(self, ctx, emote: str):
+        """Sets the emoji to react with when the count is wrong."""
+        await self.config.guild(ctx.guild).wrong_emote.set(emote)
+        await ctx.send(f"Wrong emote set to {emote}")
 
     @commands.Cog.listener()
     async def on_message(self, message):
